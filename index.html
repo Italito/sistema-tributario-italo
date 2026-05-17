@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sistema Tributario — Italo Iozzelli v2</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0f0f0d;--bg2:#161614;--bg3:#1e1e1b;--bg4:#252522;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);--text:#f0efe8;--text2:#9a9990;--text3:#5a5a54;--accent:#c8f060;--accent2:#a8d040;--red:#ff6b6b;--amber:#f4b942;--blue:#60a8f0;--green:#60d4a0;--purple:#a78bfa;--font-display:'DM Serif Display',serif;--font-body:'Outfit',sans-serif;--font-mono:'DM Mono',monospace;--r:10px;--r-lg:16px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-body);background:var(--bg);color:var(--text);font-size:14px;line-height:1.6;min-height:100vh}
+.header{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.5rem;border-bottom:1px solid var(--border);background:var(--bg2);position:sticky;top:0;z-index:100;flex-wrap:wrap;gap:8px}
+.logo{font-family:var(--font-display);font-size:18px;color:var(--accent)}
+.logo span{color:var(--text2);font-style:italic;font-size:15px}
+.hbadge{font-size:10px;font-family:var(--font-mono);background:var(--bg4);border:1px solid var(--border2);padding:3px 10px;border-radius:20px;color:var(--text2);letter-spacing:.04em}
+.nav{display:flex;gap:0;padding:0 1.5rem;background:var(--bg2);border-bottom:1px solid var(--border);overflow-x:auto}
+.nb{padding:10px 16px;font-size:13px;font-family:var(--font-body);font-weight:500;background:none;border:none;cursor:pointer;color:var(--text3);border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .2s;white-space:nowrap}
+.nb.on{color:var(--accent);border-bottom-color:var(--accent)}
+.nb:hover:not(.on){color:var(--text)}
+.wrap{max-width:1100px;margin:0 auto;padding:1.5rem}
+.panel{display:none}.panel.on{display:block}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-lg);padding:1.25rem;margin-bottom:1rem}
+.card-accent{border-left:3px solid var(--accent)}
+.card-warn{border-left:3px solid var(--amber)}
+.card-opp{border-left:3px solid var(--purple)}
+.ct{font-size:10px;font-family:var(--font-mono);letter-spacing:.1em;color:var(--text3);text-transform:uppercase;margin-bottom:.9rem}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.gap{margin-bottom:1rem}
+.metric{background:var(--bg3);border-radius:var(--r);padding:.9rem 1rem;border:1px solid var(--border)}
+.ml{font-size:10px;color:var(--text3);font-family:var(--font-mono);letter-spacing:.06em;margin-bottom:5px;text-transform:uppercase}
+.mv{font-size:22px;font-weight:600;color:var(--text)}
+.ms{font-size:11px;color:var(--text3);margin-top:3px}
+.mv.green{color:var(--green)}.mv.red{color:var(--red)}.mv.amber{color:var(--amber)}.mv.blue{color:var(--blue)}.mv.accent{color:var(--accent)}.mv.purple{color:var(--purple)}
+.fg{display:flex;flex-direction:column;gap:5px;margin-bottom:10px}
+label{font-size:11px;color:var(--text2);font-family:var(--font-mono);letter-spacing:.04em}
+input,select,textarea{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:9px 12px;font-size:13px;font-family:var(--font-body);color:var(--text);width:100%;transition:border-color .2s}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent)}
+select option{background:var(--bg3)}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 20px;border-radius:var(--r);font-size:13px;font-weight:500;font-family:var(--font-body);cursor:pointer;transition:all .15s;border:none}
+.btn-primary{background:var(--accent);color:#0f0f0d}.btn-primary:hover{background:var(--accent2);transform:translateY(-1px)}
+.btn-ghost{background:transparent;border:1px solid var(--border2);color:var(--text2)}.btn-ghost:hover{background:var(--bg3);color:var(--text)}
+.btn-sm{padding:6px 14px;font-size:12px}
+.btn-danger{background:rgba(255,107,107,.12);color:var(--red);border:1px solid rgba(255,107,107,.25)}
+.btn-purple{background:rgba(167,139,250,.12);color:var(--purple);border:1px solid rgba(167,139,250,.25)}
+.badge{display:inline-block;font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600;font-family:var(--font-mono);letter-spacing:.03em}
+.bg-green{background:rgba(96,212,160,.15);color:var(--green);border:1px solid rgba(96,212,160,.25)}
+.bg-red{background:rgba(255,107,107,.15);color:var(--red);border:1px solid rgba(255,107,107,.25)}
+.bg-amber{background:rgba(244,185,66,.15);color:var(--amber);border:1px solid rgba(244,185,66,.25)}
+.bg-blue{background:rgba(96,168,240,.15);color:var(--blue);border:1px solid rgba(96,168,240,.25)}
+.bg-purple{background:rgba(167,139,250,.15);color:var(--purple);border:1px solid rgba(167,139,250,.25)}
+.bg-accent{background:rgba(200,240,96,.15);color:var(--accent);border:1px solid rgba(200,240,96,.25)}
+.row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}
+.row:last-child{border-bottom:none}
+.rl{color:var(--text2)}.rv{font-weight:500;font-family:var(--font-mono)}
+.rv.neg{color:var(--red)}.rv.pos{color:var(--green)}.rv.neu{color:var(--amber)}
+.total-row{display:flex;justify-content:space-between;padding:12px 0 0;font-size:15px;font-weight:600;border-top:1px solid var(--border2);margin-top:6px}
+.tbl{width:100%;border-collapse:collapse;font-size:12px}
+.tbl th{font-size:10px;font-family:var(--font-mono);color:var(--text3);text-transform:uppercase;letter-spacing:.06em;text-align:right;padding:8px 10px;border-bottom:1px solid var(--border)}
+.tbl th:first-child{text-align:left}
+.tbl td{padding:9px 10px;text-align:right;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle}
+.tbl td:first-child{text-align:left}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:rgba(255,255,255,.02)}
+.tbl .tfoot td{font-weight:600;color:var(--accent);border-top:1px solid var(--border2);font-family:var(--font-mono);font-size:11px}
+.upload-zone{border:2px dashed var(--border2);border-radius:var(--r-lg);padding:2.5rem;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg3)}
+.upload-zone:hover,.upload-zone.dragover{border-color:var(--accent);background:rgba(200,240,96,.04)}
+#file-input{display:none}
+.ai-result{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r-lg);padding:1.25rem;margin-top:1rem;animation:fadeIn .3s ease}
+.ai-result-hdr{display:flex;align-items:center;gap:10px;margin-bottom:1rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+.ai-badge{font-size:10px;font-family:var(--font-mono);background:rgba(200,240,96,.1);color:var(--accent);border:1px solid rgba(200,240,96,.2);padding:3px 10px;border-radius:20px}
+.dec-box{border-radius:var(--r);padding:12px 14px;margin-top:.75rem;font-size:13px}
+.dec-si{background:rgba(96,212,160,.08);border:1px solid rgba(96,212,160,.2);color:var(--green)}
+.dec-no{background:rgba(255,107,107,.08);border:1px solid rgba(255,107,107,.2);color:var(--red)}
+.dec-par{background:rgba(244,185,66,.08);border:1px solid rgba(244,185,66,.2);color:var(--amber)}
+.inner-tabs{display:flex;gap:6px;margin-bottom:1rem;flex-wrap:wrap}
+.it{padding:6px 14px;border-radius:20px;font-size:12px;font-family:var(--font-mono);border:1px solid var(--border);background:transparent;color:var(--text3);cursor:pointer;transition:all .15s}
+.it.on{background:var(--bg3);border-color:var(--border2);color:var(--text)}
+.wf-row{display:flex;justify-content:space-between;align-items:center;padding:9px 12px;margin-bottom:3px;border-radius:var(--r);font-size:13px}
+.wf-main{background:var(--bg3)}.wf-ded{background:rgba(255,107,107,.06);padding-left:24px}
+.wf-result{background:rgba(200,240,96,.08);border:1px solid rgba(200,240,96,.15)}
+.wf-sub{background:rgba(96,168,240,.06);padding-left:24px}
+.alert{border-radius:var(--r);padding:10px 14px;font-size:12px;margin-bottom:8px;display:flex;gap:10px;align-items:flex-start;line-height:1.5}
+.a-amber{background:rgba(244,185,66,.08);color:var(--amber);border:1px solid rgba(244,185,66,.2)}
+.a-green{background:rgba(96,212,160,.08);color:var(--green);border:1px solid rgba(96,212,160,.2)}
+.a-red{background:rgba(255,107,107,.08);color:var(--red);border:1px solid rgba(255,107,107,.2)}
+.a-blue{background:rgba(96,168,240,.08);color:var(--blue);border:1px solid rgba(96,168,240,.2)}
+.a-purple{background:rgba(167,139,250,.08);color:var(--purple);border:1px solid rgba(167,139,250,.2)}
+.pbar{height:6px;background:var(--bg4);border-radius:3px;overflow:hidden;margin-top:4px}
+.pbar-fill{height:100%;border-radius:3px;transition:width .5s;background:var(--accent)}
+.loading{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text2);padding:1rem}
+.spinner{width:16px;height:16px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
+.empty{text-align:center;padding:3rem 1rem;color:var(--text3)}
+.req-block{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:1rem;margin-bottom:.75rem}
+.req-title{font-size:12px;font-weight:600;color:var(--text);margin-bottom:.5rem;display:flex;align-items:center;gap:8px}
+.req-item{display:flex;align-items:flex-start;gap:8px;font-size:12px;color:var(--text2);margin-bottom:4px;padding:4px 0;border-bottom:1px solid var(--border)}
+.req-item:last-child{border-bottom:none}
+.req-icon{font-size:14px;flex-shrink:0;margin-top:1px}
+.opp-card{background:var(--bg3);border:1px solid rgba(167,139,250,.2);border-radius:var(--r-lg);padding:1rem;margin-bottom:.75rem;position:relative;overflow:hidden}
+.opp-card::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:var(--purple)}
+.opp-title{font-size:13px;font-weight:600;color:var(--purple);margin-bottom:.35rem}
+.opp-body{font-size:12px;color:var(--text2);line-height:1.6}
+.opp-saving{display:inline-block;font-size:11px;font-family:var(--font-mono);background:rgba(167,139,250,.12);color:var(--purple);border:1px solid rgba(167,139,250,.25);padding:3px 10px;border-radius:20px;margin-top:.5rem}
+.divider{border:none;border-top:1px solid var(--border);margin:1rem 0}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media(max-width:600px){.g2,.g3,.g4{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="header">
+  <div style="display:flex;align-items:center;gap:12px">
+    <div class="logo">Italo Iozzelli <span>/ Sistema Tributario Personal</span></div>
+    <span class="hbadge">v2 · SUNAT 2026</span>
+  </div>
+  <div style="display:flex;gap:6px;flex-wrap:wrap">
+    <span class="hbadge">RUC 10079663293</span>
+    <span class="hbadge">UIT S/ 5,500</span>
+    <span class="hbadge">4ta Categoría</span>
+    <span class="hbadge" id="hdr-tc">TC: 3.48</span>
+  </div>
+</div>
+<div class="nav">
+  <button class="nb on" onclick="swNav('dashboard',this)">Dashboard</button>
+  <button class="nb" onclick="swNav('comprobantes',this)">Analizar comprobantes</button>
+  <button class="nb" onclick="swNav('requisitos',this)">Guía de requisitos</button>
+  <button class="nb" onclick="swNav('oportunidades',this)">💡 Oportunidades</button>
+  <button class="nb" onclick="swNav('presupuesto',this)">Presupuesto</button>
+  <button class="nb" onclick="swNav('historial',this)">Historial</button>
+  <button class="nb" onclick="swNav('impuestos',this)">Calculadora IR</button>
+</div>
+<div class="wrap">
+
+<!-- ===== DASHBOARD ===== -->
+<div id="p-dashboard" class="panel on">
+  <div class="g4 gap" id="dash-metrics"></div>
+  <div class="g2">
+    <div class="card">
+      <p class="ct">Ingresos vs gastos 2026</p>
+      <div id="dash-chart" style="height:180px;display:flex;align-items:flex-end;gap:6px;padding-top:1rem"></div>
+      <div style="display:flex;gap:16px;margin-top:.5rem;font-size:11px;color:var(--text3)">
+        <span><span style="display:inline-block;width:10px;height:10px;background:var(--accent);border-radius:2px;margin-right:4px"></span>Ingresos</span>
+        <span><span style="display:inline-block;width:10px;height:10px;background:var(--red);border-radius:2px;margin-right:4px;opacity:.6"></span>Gastos</span>
+      </div>
+    </div>
+    <div class="card">
+      <p class="ct">Waterfall tributario acumulado</p>
+      <div id="dash-waterfall"></div>
+    </div>
+  </div>
+  <div class="g2">
+    <div class="card">
+      <p class="ct">Últimos comprobantes</p>
+      <div id="dash-comps"></div>
+    </div>
+    <div class="card">
+      <p class="ct">Alertas — fechas clave SUNAT 2026</p>
+      <div id="dash-alertas"></div>
+    </div>
+  </div>
+  <div class="card card-opp">
+    <p class="ct">⚡ Oportunidades tributarias no aprovechadas</p>
+    <div id="dash-opp-preview"></div>
+    <div style="margin-top:.75rem">
+      <button class="btn btn-purple btn-sm" onclick="document.querySelectorAll('.nb')[3].click()">Ver análisis completo →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== COMPROBANTES ===== -->
+<div id="p-comprobantes" class="panel">
+  <div class="g2">
+    <div>
+      <div class="card">
+        <p class="ct">Analizar comprobante con IA</p>
+        <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()">
+          <div style="font-size:32px;opacity:.4;margin-bottom:.5rem">📄</div>
+          <div style="font-size:14px;font-weight:500;margin-bottom:.25rem">Arrastra o haz clic para subir</div>
+          <div style="font-size:12px;color:var(--text3)">Facturas, boletas, recibos — JPG, PNG, PDF</div>
+        </div>
+        <input type="file" id="file-input" accept="image/*,.pdf" multiple onchange="handleFiles(this.files)"/>
+        <div class="g2" style="margin-top:1rem">
+          <div class="fg"><label>Tipo de comprobante</label>
+            <select id="comp-tipo">
+              <option value="factura">Factura electrónica</option>
+              <option value="boleta">Boleta de venta electrónica</option>
+              <option value="honorarios">Recibo por honorarios electrónico</option>
+              <option value="form1683">Formulario 1683 (arrendamiento)</option>
+              <option value="extranjero">Pago al exterior (PayPal/tarjeta)</option>
+              <option value="ticket">Ticket / recibo simple</option>
+              <option value="otro">Otro</option>
+            </select>
+          </div>
+          <div class="fg"><label>Categoría del gasto</label>
+            <select id="comp-cat">
+              <option value="software">Software / herramientas</option>
+              <option value="alquiler">Alquiler / vivienda</option>
+              <option value="alimentacion">Alimentación / restaurantes</option>
+              <option value="salud">Salud / médicos</option>
+              <option value="capacitacion">Capacitación / cursos</option>
+              <option value="transporte">Transporte</option>
+              <option value="viaje">Viajes de negocio</option>
+              <option value="honorarios_prof">Honorarios profesionales</option>
+              <option value="otros">Otros</option>
+            </select>
+          </div>
+        </div>
+        <div class="fg"><label>Monto pagado S/ (si no hay imagen)</label><input type="number" id="comp-monto" value="0" min="0" step="0.01"/></div>
+        <div class="fg"><label>Notas (ej: pago con tarjeta BCP, DNI incluido, etc.)</label><input type="text" id="comp-notas" placeholder="Detalles relevantes para la deducción"/></div>
+        <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:.25rem" onclick="analizarComp()">
+          ✦ Analizar con IA — SUNAT 2026
+        </button>
+      </div>
+      <div id="ai-output"></div>
+    </div>
+    <div>
+      <div class="card">
+        <p class="ct">Comprobantes registrados</p>
+        <div class="inner-tabs">
+          <button class="it on" onclick="filtrarComps('todos',this)">Todos</button>
+          <button class="it" onclick="filtrarComps('si',this)">Deducible ✓</button>
+          <button class="it" onclick="filtrarComps('parcial',this)">Parcial</button>
+          <button class="it" onclick="filtrarComps('no',this)">No deducible</button>
+        </div>
+        <div id="comp-list"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== REQUISITOS ===== -->
+<div id="p-requisitos" class="panel">
+  <div class="alert a-blue" style="margin-bottom:1rem">ℹ️ <span>Información oficial actualizada directamente de <strong>SUNAT personas.sunat.gob.pe</strong> — vigente para el ejercicio 2026. UIT: S/ 5,500 · DS N° 301-2025-EF.</span></div>
+
+  <div class="g2">
+    <div>
+      <div class="card card-warn">
+        <p class="ct">🍽 Restaurantes, bares y hoteles — 15%</p>
+        <div class="req-block">
+          <div class="req-title"><span class="badge bg-amber">TASA 2026: 15%</span> <span style="font-size:11px;color:var(--text3)">(era 25% solo 2021-2022)</span></div>
+          <div class="req-item"><span class="req-icon">✓</span><span><strong>Boleta electrónica o factura electrónica</strong> del establecimiento con tu <strong>DNI en el campo "DNI"</strong> (no en observaciones)</span></div>
+          <div class="req-item"><span class="req-icon">✓</span><span>El establecimiento debe tener <strong>RUC activo y condición HABIDO</strong></span></div>
+          <div class="req-item"><span class="req-icon">✓</span><span>El negocio debe tener <strong>CIIU 55</strong> (hoteles) o <strong>56</strong> (restaurantes/bares) como actividad principal</span></div>
+          <div class="req-item"><span class="req-icon">⚠️</span><span>Pagos ≥ S/ 2,000 o USD 500: <strong>obligatorio usar medio de pago bancario</strong> (tarjeta, transferencia, depósito). Sin bancarización = sin deducción</span></div>
+          <div class="req-item"><span class="req-icon">❌</span><span>NO sirve: DNI en campo "observaciones", ticket de caja sin DNI, pago en efectivo si ≥ S/ 2,000</span></div>
+        </div>
+        <div class="alert a-amber">⚠️ <span>El % deducible es 15% sobre el gasto efectivamente pagado (no sobre el IGV como en años anteriores). Para 2026 esto significa: si gastate S/ 1,000 en restaurantes, deduces S/ 150.</span></div>
+      </div>
+
+      <div class="card">
+        <p class="ct">🏥 Médicos y odontólogos — 30%</p>
+        <div class="req-block">
+          <div class="req-item"><span class="req-icon">✓</span><span><strong>Recibo por honorarios electrónico</strong> emitido por el profesional</span></div>
+          <div class="req-item"><span class="req-icon">✓</span><span>El médico/odontólogo debe tener <strong>su profesión registrada en SUNAT</strong></span></div>
+          <div class="req-item"><span class="req-icon">✓</span><span>El RHE debe indicar el <strong>medio de pago utilizado</strong></span></div>
+          <div class="req-item"><span class="req-icon">✓</span><span>Aplica también para servicios de salud de: <strong>hijos menores de 18 años, hijos mayores con discapacidad (CONADIS), cónyuge/concubino</strong></span></div>
+          <div class="req-item"><span class="req-icon">✓</span><span>Solo la parte <strong>no reembolsada por seguros</strong> es deducible</span></div>
+          <div class="req-item"><span class="req-icon">⚠️</span><span>Pagos ≥ S/ 2,000: medio de pago bancario obligatorio</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <p class="ct">👨‍💼 Honorarios profesionales — 30%</p>
+        <div class="req-block">
+          <div class="req-item"><span class="req-icon">✓</span><span><strong>Recibo por honorarios electrónico</strong> con tu RUC o DNI</span></div>
+          <div class="req-item"><span class="req-icon">✓</span><span>Emisor con <strong>RUC activo y condición HABIDO</strong></span></div>
+          <div class="req-item"><span class="req-icon">✓</span><span>Incluye: contadores, abogados, ingenieros, arquitectos, consultores, diseñadores</span></div>
+          <div class="req-item"><span class="req-icon">❌</span><span>NO aplica: directores de empresas, síndicos, gestores de negocios, albaceas</span></div>
+          <div class="req-item"><span class="req-icon">⚠️</span><span>Pagos ≥ S/ 2,000: medio de pago bancario obligatorio</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <p class="ct">🏠 Alquiler de inmuebles — 30%</p>
+        <div class="req-block">
+          <div class="req-title"><span class="badge bg-blue">NOVEDAD 2026 — Ley 32430</span></div>
+          <div class="req-item"><span class="req-icon">✓</span><span>Si arrendador es <strong>persona natural sin negocio</strong>: exigir <strong>Formulario N° 1683</strong> (físico o virtual) con tu DNI/RUC</span></div>
+          <div class="req-item"><span class="req-icon">✓</span><span>Si arrendador es <strong>empresa (3ra categoría)</strong>: exigir <strong>factura electrónica</strong></span></div>
+          <div class="req-item"><span class="req-icon">✓</span><span>El inmueble <strong>no debe estar destinado exclusivamente a negocios/empresas</strong></span></div>
+          <div class="req-item"><span class="req-icon">⚠️</span><span>Pagos ≥ S/ 2,000 o USD 500: <strong>obligatorio medio de pago bancario</strong> (transferencia, depósito, cheque). Este es el principal sustento ante SUNAT.</span></div>
+          <div class="req-item"><span class="req-icon">✓</span><span>Puedes <strong>atribuir hasta 50%</strong> del gasto a tu cónyuge/concubino si el comprobante está a tu nombre</span></div>
+          <div class="req-item"><span class="req-icon">✓</span><span>Desde 2026 (Ley 32430): el arrendador solo tributa cuando recibe el pago. Confirma que tu arrendador cumpla con el Form. 1683 en el mes de cobro.</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <p class="ct">👩‍🍳 EsSalud trabajadoras del hogar — 100%</p>
+        <div class="req-block">
+          <div class="req-item"><span class="req-icon">✓</span><span>Inscribir al trabajador/a en el <strong>Registro del Trabajador del Hogar (MTPE)</strong></span></div>
+          <div class="req-item"><span class="req-icon">✓</span><span>Registrar los derechohabientes en <strong>SUNAT Virtual</strong></span></div>
+          <div class="req-item"><span class="req-icon">✓</span><span>Sustentarse con <strong>Formulario N° 1676</strong> (físico o virtual)</span></div>
+          <div class="req-item"><span class="req-icon">✓</span><span>La aportación es el 9% de la remuneración mensual</span></div>
+        </div>
+      </div>
+
+      <div class="card card-accent">
+        <p class="ct">📋 Reglas generales irrenunciables</p>
+        <div class="req-block">
+          <div class="req-item"><span class="req-icon">🔑</span><span><strong>Bancarización:</strong> cualquier pago ≥ S/ 2,000 o USD 500 DEBE realizarse con medio de pago bancario (Ley N° 28194). Sin esto, el gasto NO es deducible aunque tengas comprobante.</span></div>
+          <div class="req-item"><span class="req-icon">🔑</span><span><strong>Tope 3 UIT:</strong> la suma de TODAS las deducciones adicionales no puede superar S/ 16,500 en el año 2026.</span></div>
+          <div class="req-item"><span class="req-icon">🔑</span><span><strong>Comprobante electrónico:</strong> para honorarios y arrendamiento, el comprobante debe ser electrónico (no físico de papel).</span></div>
+          <div class="req-item"><span class="req-icon">🔑</span><span><strong>RUC activo y condición HABIDO:</strong> el emisor del comprobante debe tener RUC activo y no tener condición de No Habido en SUNAT al momento de la emisión.</span></div>
+          <div class="req-item"><span class="req-icon">🔑</span><span><strong>Datos correctos:</strong> tu DNI debe aparecer en el campo "DNI" o tu RUC en el campo "RUC". Si está en "observaciones", el gasto NO es deducible.</span></div>
+        </div>
+        <div class="alert a-green">✓ <span>Puedes consultar los gastos que SUNAT ya registró automáticamente en: <strong>personas.sunat.gob.pe</strong> → Gastos deducibles 2026 con tu Clave SOL.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cronograma -->
+  <div class="card">
+    <p class="ct">📅 Cronograma SUNAT 2026 — RUC dígito 3</p>
+    <div class="g3">
+      <div class="req-block">
+        <div class="req-title">DJ Anual Renta 2025 — Formulario 709</div>
+        <div class="req-item"><span class="req-icon">📌</span><span>Disponible desde: <strong>31 de marzo 2026</strong></span></div>
+        <div class="req-item"><span class="req-icon">⏰</span><span>Vencimiento RUC dígito 3: <strong>2 de junio 2026</strong> (bajo Ley 31940)</span></div>
+        <div class="req-item"><span class="req-icon">ℹ️</span><span>Aplica Ley N° 31940 si tus ingresos 2025 ≤ 1,700 UIT (≤ S/ 9,095,000)</span></div>
+      </div>
+      <div class="req-block">
+        <div class="req-title">Pagos a cuenta mensuales (8%)</div>
+        <div class="req-item"><span class="req-icon">📌</span><span>RUC dígito 2 y 3: vence el <strong>día 20 del mes siguiente</strong></span></div>
+        <div class="req-item"><span class="req-icon">⚠️</span><span>Solo si el cliente no retuvo el 8%. Si retuvo, el pago ya está cubierto.</span></div>
+        <div class="req-item"><span class="req-icon">ℹ️</span><span>Exceptuado si ingresos mensuales ≤ S/ 4,010</span></div>
+      </div>
+      <div class="req-block">
+        <div class="req-title">Suspensión de retenciones</div>
+        <div class="req-item"><span class="req-icon">💡</span><span>Solicitar en SUNAT Virtual si proyectas ingresos anuales ≤ S/ 48,125</span></div>
+        <div class="req-item"><span class="req-icon">📌</span><span>Formulario Virtual en: <strong>sunat.gob.pe → Retenciones 4ta</strong></span></div>
+        <div class="req-item"><span class="req-icon">✓</span><span>Mejora tu flujo de caja mensual</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== OPORTUNIDADES ===== -->
+<div id="p-oportunidades" class="panel">
+  <div class="alert a-purple" style="margin-bottom:1rem">💡 <span>Este análisis detecta beneficios tributarios SUNAT 2026 que puedes estar dejando de aprovechar, basándose en tu perfil como persona natural 4ta categoría.</span></div>
+
+  <div id="opp-dinamico"></div>
+
+  <div class="card card-opp">
+    <p class="ct">💡 Oportunidades por perfil — Persona natural 4ta categoría</p>
+
+    <div class="opp-card">
+      <div class="opp-title">1. Gastos de representación en restaurantes (con clientes)</div>
+      <div class="opp-body">Como Asesor Comercial que visita clientes como MAPFRE, Pacífico, Protecta y AXA México, todos tus gastos en restaurantes con clientes o potenciales clientes son deducibles al <strong>15%</strong> del gasto pagado (hasta el tope de 3 UIT). La clave: pagar con tarjeta y que la boleta tenga tu DNI en el campo "DNI". <br><br>Ejemplo: si gastas S/ 3,000/mes en almuerzos de trabajo → S/ 450/mes deducibles → S/ 5,400/año.</div>
+      <span class="opp-saving">Potencial deducción: hasta S/ 5,400/año</span>
+    </div>
+
+    <div class="opp-card">
+      <div class="opp-title">2. Alquiler de vivienda/oficina home office</div>
+      <div class="opp-body">Si pagas alquiler (vivienda u oficina), el 30% del monto pagado es deducible dentro de las 3 UIT. Requieres el <strong>Formulario 1683</strong> de tu arrendador (o factura si es empresa) y pagar por medios bancarios si el monto ≥ S/ 2,000.<br><br>Ejemplo: alquiler S/ 2,500/mes → deduces S/ 750/mes → S/ 9,000/año. Pero tope es S/ 16,500 total entre todas las categorías.</div>
+      <span class="opp-saving">Potencial deducción: hasta S/ 9,000/año (si alquiler ≥ S/ 2,500/mes)</span>
+    </div>
+
+    <div class="opp-card">
+      <div class="opp-title">3. Servicios de contador / asesor legal (honorarios profesionales)</div>
+      <div class="opp-body">Si contratas a un contador, abogado o consultor que emite <strong>recibo por honorarios electrónico</strong>, el 30% es deducible. Dado que estás gestionando temas tributarios, un asesor contable sería deducible y además te generaría más ahorros tributarios de los que cuesta.</div>
+      <span class="opp-saving">Potencial deducción: 30% de lo pagado</span>
+    </div>
+
+    <div class="opp-card">
+      <div class="opp-title">4. Gastos médicos propios y familiares</div>
+      <div class="opp-body">Consultas médicas, odontólogos, exámenes, medicina preventiva — 30% deducible si el profesional emite <strong>recibo por honorarios electrónico</strong>. Aplica también para tu cónyuge e hijos menores de 18 años (o mayores con discapacidad registrada en CONADIS). Muchas personas pagan estas consultas sin pedir comprobante.</div>
+      <span class="opp-saving">Potencial deducción: 30% del gasto anual en salud</span>
+    </div>
+
+    <div class="opp-card">
+      <div class="opp-title">5. Cursos de capacitación y plataformas educativas</div>
+      <div class="opp-body">Cursos de inteligencia de mercado, data analytics, ventas, liderazgo — si el proveedor emite <strong>recibo por honorarios electrónico o factura</strong>, es deducible. Plataformas como Coursera, LinkedIn Learning, etc. emiten facturas al exterior. Aunque los pagos al exterior tienen restricciones, conviene documentarlos correctamente.</div>
+      <span class="opp-saving">Consultar con asesor tributario caso por caso</span>
+    </div>
+
+    <div class="opp-card">
+      <div class="opp-title">6. Maximizar el tope de 3 UIT (S/ 16,500)</div>
+      <div class="opp-body">La mayoría de contribuyentes no llega al tope de S/ 16,500 por no documentar correctamente sus gastos cotidianos. Estrategia: <br>• Paga SIEMPRE con tarjeta en restaurantes y solicita boleta con DNI<br>• Guarda TODOS los recibos de médicos<br>• Exige el formulario 1683 de tu arrendador cada mes<br>• Registra honorarios de contador, abogado, etc.<br><br>Si combinas alquiler + restaurantes + médicos + honorarios puedes llegar fácilmente al tope.</div>
+      <span class="opp-saving">Ahorro fiscal máximo: S/ 16,500 × 8-14% = S/ 1,320 – S/ 2,310</span>
+    </div>
+
+    <div class="opp-card">
+      <div class="opp-title">7. Verificar gastos ya registrados en SUNAT automáticamente</div>
+      <div class="opp-body">SUNAT carga automáticamente en el Formulario 709 los gastos que los emisores han reportado con tu DNI/RUC. Antes de la DJ anual, ingresa a <strong>personas.sunat.gob.pe</strong> con tu Clave SOL y revisa si ya hay gastos pre-cargados que puedes aprovechar sin hacer nada adicional.</div>
+      <span class="opp-saving">Acción: verificar en SUNAT Virtual antes del 2 junio 2026</span>
+    </div>
+
+    <div class="opp-card">
+      <div class="opp-title">8. Solicitar suspensión de retenciones si aplica</div>
+      <div class="opp-body">Si tus ingresos anuales proyectados no superan <strong>S/ 48,125</strong>, puedes solicitar la suspensión de retenciones y tener mejor flujo de caja mensual. Si los superas, puedes seguir acumulando retenciones para una potencial devolución en la DJ anual.</div>
+      <span class="opp-saving">Acción: solicitar en SUNAT Virtual → Retenciones 4ta categoría</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <p class="ct">📊 Simulador: ¿Cuánto podrías ahorrar?</p>
+    <div class="g3">
+      <div class="fg"><label>Alquiler mensual S/</label><input type="number" id="sim-alq" value="0" step="100" min="0" oninput="calcSim()"/></div>
+      <div class="fg"><label>Restaurantes/mes S/</label><input type="number" id="sim-rest" value="0" step="100" min="0" oninput="calcSim()"/></div>
+      <div class="fg"><label>Médicos/año S/</label><input type="number" id="sim-med" value="0" step="100" min="0" oninput="calcSim()"/></div>
+    </div>
+    <div class="g3">
+      <div class="fg"><label>Honorarios prof./año S/</label><input type="number" id="sim-hon" value="0" step="100" min="0" oninput="calcSim()"/></div>
+      <div class="fg"><label>Tasa IR estimada %</label><input type="number" id="sim-tasa" value="8" step="1" min="8" max="30" oninput="calcSim()"/></div>
+      <div class="fg"></div>
+    </div>
+    <div class="g4" id="sim-results"></div>
+  </div>
+</div>
+
+<!-- ===== PRESUPUESTO ===== -->
+<div id="p-presupuesto" class="panel">
+  <div class="g2 gap">
+    <div class="fg"><label>Mes</label>
+      <select id="pres-mes" onchange="cargarMes()">
+        <option value="1">Enero</option><option value="2">Febrero</option><option value="3" selected>Marzo</option>
+        <option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option>
+        <option value="7">Julio</option><option value="8">Agosto</option><option value="9">Septiembre</option>
+        <option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
+      </select>
+    </div>
+    <div class="fg"><label>Año</label>
+      <select id="pres-year" onchange="cargarMes()"><option value="2025">2025</option><option value="2026" selected>2026</option></select>
+    </div>
+  </div>
+  <div class="g2">
+    <div class="card">
+      <p class="ct">Ingresos del mes</p>
+      <div class="fg"><label>Comisiones USD $</label><input type="number" id="p-usd" value="0" min="0" step="0.01" oninput="calcPres()"/></div>
+      <div class="fg"><label>Tipo de cambio</label><input type="number" id="p-tc" value="3.48" min="3" max="5" step="0.01" oninput="calcPres()"/></div>
+      <div class="fg"><label>Comisiones soles S/</label><input type="number" id="p-pen" value="0" min="0" step="0.01" oninput="calcPres()"/></div>
+      <div class="fg"><label>Otros ingresos S/</label><input type="number" id="p-otros" value="0" min="0" step="1" oninput="calcPres()"/></div>
+    </div>
+    <div class="card">
+      <p class="ct">Resumen del mes</p>
+      <div id="pres-metrics" class="g2"></div>
+    </div>
+  </div>
+  <div class="card">
+    <p class="ct">Gastos del mes</p>
+    <div id="gastos-form"></div>
+    <div style="text-align:right;margin-top:.75rem"><button class="btn btn-ghost btn-sm" onclick="addGasto()">+ Agregar línea</button></div>
+  </div>
+  <div class="card" id="pres-resumen"></div>
+  <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:.5rem">
+    <button class="btn btn-ghost" onclick="cargarMes()">↺ Reiniciar</button>
+    <button class="btn btn-primary" onclick="guardarMes()">Guardar mes →</button>
+  </div>
+</div>
+
+<!-- ===== HISTORIAL ===== -->
+<div id="p-historial" class="panel">
+  <div style="display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap;align-items:center">
+    <span style="font-size:11px;color:var(--text3);font-family:var(--font-mono)">AÑO:</span>
+    <button class="it on" onclick="filtrarHist('2026',this)">2026</button>
+    <button class="it" onclick="filtrarHist('2025',this)">2025</button>
+    <button class="it" onclick="filtrarHist('todos',this)">Todos</button>
+  </div>
+  <div class="card" style="overflow-x:auto"><div id="hist-tabla"></div></div>
+  <div class="g2">
+    <div class="card"><p class="ct">Gastos deducibles por categoría</p><div id="hist-ded"></div></div>
+    <div class="card"><p class="ct">Resumen de comprobantes</p><div id="hist-comps"></div></div>
+  </div>
+</div>
+
+<!-- ===== CALCULADORA IR ===== -->
+<div id="p-impuestos" class="panel">
+  <div class="g2">
+    <div>
+      <div class="card card-accent">
+        <p class="ct">Parámetros oficiales 2026</p>
+        <div class="g2">
+          <div class="fg"><label>UIT 2026 (DS N° 301-2025-EF)</label><input type="number" id="ir-uit" value="5500" oninput="calcIRPanel()"/></div>
+          <div class="fg"><label>Tipo de cambio referencial</label><input type="number" id="ir-tc" value="3.48" step="0.01" oninput="calcIRPanel()"/></div>
+        </div>
+      </div>
+      <div class="card">
+        <p class="ct">Ingresos anuales</p>
+        <div class="row"><span class="rl">Desde historial guardado</span><span class="rv accent" id="ir-ing-hist">S/ 0.00</span></div>
+        <div class="fg" style="margin-top:.75rem"><label>Ajuste manual S/</label><input type="number" id="ir-ajuste" value="0" step="1" min="0" oninput="calcIRPanel()"/></div>
+        <div class="row"><span class="rl" style="font-weight:600">Total ingresos brutos</span><span class="rv accent" id="ir-total-ing">S/ 0.00</span></div>
+      </div>
+      <div class="card">
+        <p class="ct">Deducciones adicionales 3 UIT (S/ 16,500 tope)</p>
+        <div class="fg"><label>Alquiler S/ → 30% deducible</label><input type="number" id="ir-alq" value="0" step="1" min="0" oninput="calcIRPanel()"/></div>
+        <div class="fg"><label>Honorarios profesionales S/ → 30%</label><input type="number" id="ir-hon" value="0" step="1" min="0" oninput="calcIRPanel()"/></div>
+        <div class="fg"><label>Restaurantes/hoteles S/ → 15% del gasto</label><input type="number" id="ir-rest" value="0" step="1" min="0" oninput="calcIRPanel()"/></div>
+        <div class="fg"><label>Médicos/odontólogos S/ → 30%</label><input type="number" id="ir-med" value="0" step="1" min="0" oninput="calcIRPanel()"/></div>
+        <div class="fg"><label>EsSalud trabajadoras del hogar → 100%</label><input type="number" id="ir-ess" value="0" step="1" min="0" oninput="calcIRPanel()"/></div>
+        <div class="row" style="margin-top:.5rem"><span class="rl">Deducción 3 UIT calculada</span><span class="rv green" id="ir-d3">S/ 0.00</span></div>
+        <div class="pbar"><div class="pbar-fill" id="ir-d3bar" style="width:0%"></div></div>
+        <div style="font-size:10px;color:var(--text3);font-family:var(--font-mono);margin-top:3px" id="ir-d3pct">0% del tope</div>
+      </div>
+      <div class="card">
+        <p class="ct">Retenciones acumuladas</p>
+        <div class="row"><span class="rl">Del historial (8%)</span><span class="rv green" id="ir-ret-hist">S/ 0.00</span></div>
+        <div class="fg" style="margin-top:.75rem"><label>Retenciones adicionales S/</label><input type="number" id="ir-ret-add" value="0" step="1" min="0" oninput="calcIRPanel()"/></div>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="position:sticky;top:72px">
+        <p class="ct">Waterfall tributario — 4ta categoría 2026</p>
+        <div id="ir-waterfall"></div>
+        <div style="border-top:1px solid var(--border);margin-top:1rem;padding-top:1rem"></div>
+        <div class="g2">
+          <div class="metric"><div class="ml">IR anual estimado</div><div class="mv red" id="ir-m1">S/ 0</div></div>
+          <div class="metric"><div class="ml" id="ir-m2-label">Saldo por pagar</div><div class="mv" id="ir-m2">S/ 0</div></div>
+        </div>
+        <div style="border-top:1px solid var(--border);margin-top:1rem;padding-top:1rem"></div>
+        <p class="ct">Escala progresiva aplicada</p>
+        <table class="tbl" id="ir-tramos"></table>
+        <div style="border-top:1px solid var(--border);margin-top:1rem;padding-top:1rem"></div>
+        <div class="alert a-amber">⚠️ <span><strong>Tu fecha DJ Anual 2025:</strong> RUC dígito 3 bajo Ley 31940 → vence aproximadamente el <strong>2 de junio 2026</strong>. Formulario 709 disponible desde 31 mar 2026.</span></div>
+        <div class="alert a-blue" style="margin-top:.5rem">ℹ️ <span><strong>Tasas 2026:</strong> restaurantes 15% · alquiler 30% · honorarios 30% · médicos 30% · EsSalud 100%. Tope: S/ 16,500.</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script>
+const UIT=5500;
+const MN=['','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const CATS={software:'Software',alquiler:'Alquiler',alimentacion:'Alimentación',salud:'Salud',capacitacion:'Capacitación',transporte:'Transporte',viaje:'Viajes',honorarios_prof:'Honorarios',otros:'Otros'};
+const CCOLORS={software:'blue',alquiler:'purple',alimentacion:'amber',salud:'green',capacitacion:'accent',transporte:'amber',viaje:'blue',honorarios_prof:'purple',otros:'red'};
+
+let DB={meses:{},comprobantes:[],gastos_lineas:[]};
+try{const s=localStorage.getItem('italo_trib_v2');if(s)DB={...DB,...JSON.parse(s)};}catch(e){}
+function save(){try{localStorage.setItem('italo_trib_v2',JSON.stringify(DB));}catch(e){}}
+
+const f=n=>'S/ '+parseFloat(n||0).toLocaleString('es-PE',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fu=n=>'$ '+parseFloat(n||0).toLocaleString('es-PE',{minimumFractionDigits:2,maximumFractionDigits:2});
+const g=id=>parseFloat(document.getElementById(id)?.value)||0;
+const el=id=>document.getElementById(id);
+
+function swNav(id,btn){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
+  el('p-'+id).classList.add('on'); btn.classList.add('on');
+  if(id==='dashboard')renderDash();
+  if(id==='historial')renderHist();
+  if(id==='presupuesto'){buildGastosForm();cargarMes();}
+  if(id==='impuestos')calcIRPanel();
+  if(id==='oportunidades')calcSim();
+}
+
+// ===== HELPERS =====
+function calcIR(b){
+  if(b<=0)return 0;
+  const T=[[5*UIT,.08],[20*UIT,.14],[35*UIT,.17],[45*UIT,.20],[Infinity,.30]];
+  let ir=0,ac=0;
+  for(const[lim,tasa]of T){if(b<=ac)break;ir+=Math.min(b-ac,lim-ac)*tasa;ac=lim;if(ac>=b)break;}
+  return ir;
+}
+function getIngMes(m){return(m.ing_usd||0)*(m.tc||3.48)+(m.ing_pen||0)+(m.ing_otros||0);}
+
+// ===== DASHBOARD =====
+function renderDash(){
+  const m26=Object.entries(DB.meses).filter(([k])=>k.startsWith('2026'));
+  const totIng=m26.reduce((s,[,m])=>s+getIngMes(m),0);
+  const totGas=m26.reduce((s,[,m])=>s+(m.gastos||[]).reduce((gs,g)=>gs+(g.monto||0),0),0);
+  const totRet=m26.reduce((s,[,m])=>s+(m.retenciones||0),0);
+  const totDed=DB.comprobantes.filter(c=>c.deductible==='si').reduce((s,c)=>s+(c.base_deducible||0),0);
+  el('dash-metrics').innerHTML=`
+    <div class="metric"><div class="ml">Ingresos brutos 2026</div><div class="mv accent">${f(totIng)}</div><div class="ms">${m26.length} mes(es)</div></div>
+    <div class="metric"><div class="ml">Gastos totales</div><div class="mv red">${f(totGas)}</div><div class="ms">Todas categorías</div></div>
+    <div class="metric"><div class="ml">Retenciones acum.</div><div class="mv green">${f(totRet)}</div><div class="ms">8% retenido</div></div>
+    <div class="metric"><div class="ml">Deduc. comprobadas</div><div class="mv purple">${f(totDed)}</div><div class="ms">${DB.comprobantes.filter(c=>c.deductible==='si').length} compr.</div></div>`;
+  const maxV=Math.max(...m26.map(([,m])=>getIngMes(m)),1);
+  el('dash-chart').innerHTML=m26.length?m26.sort((a,b)=>a[0].localeCompare(b[0])).map(([k,m])=>{
+    const ing=getIngMes(m),gas=(m.gastos||[]).reduce((s,g)=>s+(g.monto||0),0);
+    const hI=Math.round((ing/maxV)*160),hG=Math.round((gas/maxV)*160);
+    return`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px"><div style="display:flex;gap:2px;align-items:flex-end;height:160px"><div style="width:12px;height:${hI}px;background:var(--accent);border-radius:3px 3px 0 0;opacity:.8"></div><div style="width:12px;height:${hG}px;background:var(--red);border-radius:3px 3px 0 0;opacity:.6"></div></div><div style="font-size:9px;color:var(--text3);font-family:var(--font-mono)">${MN[parseInt(k.split('-')[1])].slice(0,3).toUpperCase()}</div></div>`;
+  }).join(''):'<div style="color:var(--text3);font-size:13px;padding:1rem">Sin datos</div>';
+  const d20=Math.min(totIng*.2,24*UIT),rn=totIng-d20,d7=7*UIT,base=Math.max(0,rn-d7),ir=calcIR(base);
+  el('dash-waterfall').innerHTML=`
+    <div class="wf-row wf-main"><span>Ingresos brutos</span><span style="font-family:var(--font-mono)">${f(totIng)}</span></div>
+    <div class="wf-row wf-ded"><span>− 20% gasto presunto</span><span style="font-family:var(--font-mono);color:var(--red)">− ${f(d20)}</span></div>
+    <div class="wf-row wf-ded"><span>− 7 UIT (S/ 38,500)</span><span style="font-family:var(--font-mono);color:var(--red)">− ${f(d7)}</span></div>
+    <div class="wf-row wf-result"><span style="font-weight:600">Base imponible</span><span style="font-family:var(--font-mono);color:var(--accent)">${f(base)}</span></div>
+    <div class="wf-row wf-sub"><span>IR calculado</span><span style="font-family:var(--font-mono);color:var(--red)">${f(ir)}</span></div>
+    <div class="wf-row wf-sub"><span>− Retenciones</span><span style="font-family:var(--font-mono);color:var(--green)">− ${f(totRet)}</span></div>
+    <div class="wf-row wf-result"><span style="font-weight:600">${Math.max(0,totRet-ir)>0?'Devolución est.':'Por regularizar'}</span><span style="font-family:var(--font-mono);font-size:14px;color:${Math.max(0,totRet-ir)>0?'var(--green)':'var(--amber)'}">${f(Math.abs(ir-totRet))}</span></div>`;
+  const ult=DB.comprobantes.slice(-5).reverse();
+  el('dash-comps').innerHTML=ult.length?ult.map(c=>`<div class="row"><div><div style="font-size:13px">${c.descripcion||c.cat}</div><div style="font-size:11px;color:var(--text3)">${c.fecha} · ${c.tipo}</div></div><div style="text-align:right"><div style="font-family:var(--font-mono);font-size:13px">${f(c.monto_pen)}</div><span class="badge ${c.deductible==='si'?'bg-green':c.deductible==='parcial'?'bg-amber':'bg-red'}" style="font-size:9px">${c.deductible==='si'?'DEDUC.':c.deductible==='parcial'?'PARCIAL':'NO'}</span></div></div>`).join(''):'<div class="empty"><p>Sin comprobantes aún</p></div>';
+  el('dash-alertas').innerHTML=`
+    <div class="alert a-red">🔴 <span><strong>DJ Anual 2025 próxima:</strong> RUC dígito 3 → vence ~2 junio 2026 (Ley 31940). Formulario 709 desde 31 mar 2026.</span></div>
+    <div class="alert a-amber">⚠️ <span><strong>Pagos a cuenta:</strong> RUC 2 y 3 vencen día 20 del mes siguiente.</span></div>
+    <div class="alert a-blue">ℹ️ <span><strong>Tasas 2026:</strong> restaurantes <strong>15%</strong> (no 25%), alquiler 30%, honorarios 30%, médicos 30%.</span></div>
+    <div class="alert a-green">✓ <span><strong>UIT 2026:</strong> S/ 5,500 (DS N° 301-2025-EF). Tope 3 UIT: S/ 16,500. Tope 7 UIT: S/ 38,500.</span></div>`;
+  el('dash-opp-preview').innerHTML=`
+    <div style="display:flex;flex-wrap:wrap;gap:8px">
+      <span class="badge bg-purple">Restaurantes (15%): si no pides boleta con DNI, estás perdiendo deducción</span>
+      <span class="badge bg-purple">Alquiler: necesitas Form. 1683 de tu arrendador</span>
+      <span class="badge bg-purple">Médicos: pide recibo por honorarios electrónico</span>
+      <span class="badge bg-purple">Honorarios contador: deducible al 30%</span>
+    </div>`;
+}
+
+// ===== COMPROBANTES =====
+let pendingFiles=[];
+function handleFiles(files){pendingFiles=Array.from(files);el('upload-zone').querySelector('div:nth-child(2)').textContent=`${files.length} archivo(s) listo(s)`;}
+
+async function analizarComp(){
+  const tipo=el('comp-tipo').value,cat=el('comp-cat').value,notas=el('comp-notas').value,monto=g('comp-monto');
+  el('ai-output').innerHTML=`<div class="loading"><div class="spinner"></div> Analizando con normativa SUNAT 2026…</div>`;
+  let imgContent=null;
+  if(pendingFiles.length>0){
+    const file=pendingFiles[0];
+    if(file.type.startsWith('image/')){
+      imgContent=await new Promise(res=>{const r=new FileReader();r.onload=()=>res({data:r.result.split(',')[1],mt:file.type});r.readAsDataURL(file);});
+    }
+  }
+  const prompt=`Eres un experto tributario peruano especializado en 4ta categoría persona natural, con conocimiento actualizado de las normas SUNAT vigentes para el ejercicio 2026. Analiza este comprobante y responde SOLO en JSON:
+{
+  "descripcion": "descripción breve máx 60 chars",
+  "emisor": "nombre del proveedor",
+  "fecha": "DD/MM/YYYY o null",
+  "monto": número,
+  "moneda": "PEN o USD",
+  "monto_pen": número en soles (TC 3.48 si USD),
+  "tipo_comprobante": "factura|boleta|honorarios|form1683|ticket|otro",
+  "ruc_emisor": "RUC o null",
+  "deductible": "si|no|parcial",
+  "pct_deducible": número 0-100,
+  "base_deducible_pen": monto deducible en soles,
+  "categoria_deduccion": "restaurantes_hoteles|alquiler|honorarios_profesionales|medicos|essalud|ninguna",
+  "tasa_deduccion_aplicada": "15%|30%|100%|0%",
+  "justificacion": "explicación precisa citando la norma SUNAT 2026 aplicable",
+  "requisitos_cumplidos": ["lista de requisitos que SÍ cumple"],
+  "requisitos_faltantes": ["lista de requisitos que FALTA para que sea deducible, o array vacío si cumple todo"],
+  "riesgo_deduccion": "alto|medio|bajo|ninguno",
+  "accion_recomendada": "qué debe hacer el contribuyente para asegurar/mejorar la deducción",
+  "norma_aplicable": "artículo/norma específica"
+}
+
+CONTEXTO NORMATIVO 2026 OBLIGATORIO:
+- UIT 2026: S/ 5,500 (DS 301-2025-EF)
+- Tope 3 UIT adicionales: S/ 16,500
+- Restaurantes/hoteles 2026: 15% del gasto pagado (NO 25%, ese fue solo 2021-2022)
+- Alquiler: 30%, requiere Form. 1683 si arrendador persona natural, o factura si empresa. Bancarización obligatoria ≥ S/ 2,000 (Ley 28194)
+- Honorarios prof.: 30%, solo RHE electrónico, RUC activo y HABIDO
+- Médicos/odontólogos: 30%, RHE electrónico, profesión registrada en SUNAT
+- EsSalud trabajadoras del hogar: 100%, acreditar con Form. 1676
+- Boletas restaurantes: DNI debe estar en campo "DNI" (no observaciones), CIIU 55 o 56
+- Bancarización: pagos ≥ S/ 2,000 o USD 500 obligan a usar medio bancario
+- DJ Anual 2025 (Form. 709): disponible 31 mar 2026, vence jun 2026 según RUC
+
+Contribuyente: Italo Iozzelli, RUC 10079663293, 4ta categoría, asesor comercial independiente. Tipo declarado: ${tipo}. Categoría: ${cat}. Monto declarado: S/ ${monto}. Notas: ${notas||'ninguna'}. ${imgContent?'Analiza la imagen adjunta.':'Sin imagen adjunta, basa tu análisis en el tipo y categoría declarados.'} Responde SOLO JSON válido sin texto adicional ni backticks.`;
+  try{
+    const msgs=[{role:'user',content:imgContent?[{type:'image',source:{type:'base64',media_type:imgContent.mt,data:imgContent.data}},{type:'text',text:prompt}]:prompt}];
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1200,messages:msgs})});
+    const data=await resp.json();
+    const text=data.content.map(b=>b.text||'').join('').replace(/```json|```/g,'').trim();
+    const r=JSON.parse(text);
+    const dcls=r.deductible==='si'?'dec-si':r.deductible==='parcial'?'dec-par':'dec-no';
+    const dlbl=r.deductible==='si'?'✓ DEDUCIBLE':r.deductible==='parcial'?'⚡ PARCIALMENTE DEDUCIBLE':'✗ NO DEDUCIBLE';
+    const riskColor=r.riesgo_deduccion==='alto'?'var(--red)':r.riesgo_deduccion==='medio'?'var(--amber)':'var(--green)';
+    el('ai-output').innerHTML=`<div class="ai-result">
+      <div class="ai-result-hdr"><span style="font-weight:600;font-size:15px">${r.descripcion}</span><span class="ai-badge">✦ IA · SUNAT 2026</span></div>
+      <div class="g2">
+        <div class="row"><span class="rl">Emisor</span><span class="rv">${r.emisor||'—'}</span></div>
+        <div class="row"><span class="rl">Fecha</span><span class="rv">${r.fecha||'—'}</span></div>
+        <div class="row"><span class="rl">Monto</span><span class="rv">${r.moneda==='USD'?fu(r.monto):f(r.monto)}</span></div>
+        <div class="row"><span class="rl">Monto en soles</span><span class="rv accent">${f(r.monto_pen)}</span></div>
+        <div class="row"><span class="rl">Tasa deducción</span><span class="rv">${r.tasa_deduccion_aplicada}</span></div>
+        <div class="row"><span class="rl">Riesgo</span><span class="rv" style="color:${riskColor}">${r.riesgo_deduccion?.toUpperCase()}</span></div>
+      </div>
+      <div class="dec-box ${dcls}"><strong>${dlbl}</strong> — ${r.pct_deducible}% · ${f(r.base_deducible_pen)}<br/><span style="font-size:12px;display:block;margin-top:4px">${r.justificacion}</span></div>
+      ${r.requisitos_cumplidos?.length?`<div class="alert a-green" style="margin-top:.5rem;flex-direction:column;gap:4px"><strong style="font-size:11px">✓ Requisitos cumplidos:</strong>${r.requisitos_cumplidos.map(x=>`<span>• ${x}</span>`).join('')}</div>`:''}
+      ${r.requisitos_faltantes?.length?`<div class="alert a-amber" style="margin-top:.5rem;flex-direction:column;gap:4px"><strong style="font-size:11px">⚠️ Requisitos faltantes:</strong>${r.requisitos_faltantes.map(x=>`<span>• ${x}</span>`).join('')}</div>`:''}
+      ${r.accion_recomendada?`<div class="alert a-blue" style="margin-top:.5rem">💡 <span><strong>Acción:</strong> ${r.accion_recomendada}</span></div>`:''}
+      <div style="font-size:11px;color:var(--text3);margin-top:.5rem">📋 ${r.norma_aplicable||'Ley IR Perú — 4ta categoría 2026'}</div>
+      <div style="display:flex;gap:8px;margin-top:1rem">
+        <button class="btn btn-primary btn-sm" onclick='registrarComp(${JSON.stringify(r).replace(/'/g,"&#39;").replace(/"/g,"&quot;")})'>+ Registrar</button>
+        <button class="btn btn-ghost btn-sm" onclick="el('ai-output').innerHTML=''">Descartar</button>
+      </div>
+    </div>`;
+  }catch(err){el('ai-output').innerHTML=`<div class="alert a-red">✗ Error: ${err.message}</div>`;}
+}
+
+function registrarComp(r){
+  DB.comprobantes.push({id:Date.now(),fecha:r.fecha||new Date().toLocaleDateString('es-PE'),tipo:r.tipo_comprobante,cat:el('comp-cat').value,descripcion:r.descripcion,emisor:r.emisor,monto:r.monto,moneda:r.moneda,monto_pen:r.monto_pen,deductible:r.deductible,pct_deducible:r.pct_deducible,base_deducible:r.base_deducible_pen,justificacion:r.justificacion,riesgo:r.riesgo_deduccion,notas:el('comp-notas').value});
+  save();renderCompList('todos');
+  el('ai-output').innerHTML=`<div class="alert a-green">✓ Registrado correctamente.</div>`;
+  pendingFiles=[];el('comp-notas').value='';
+}
+function filtrarComps(t,btn){document.querySelectorAll('.it').forEach(b=>b.classList.remove('on'));btn.classList.add('on');renderCompList(t);}
+function renderCompList(f){
+  const lista=f==='todos'?DB.comprobantes:DB.comprobantes.filter(c=>c.deductible===f);
+  const cont=el('comp-list');
+  if(!lista.length){cont.innerHTML='<div class="empty"><p>Sin comprobantes</p></div>';return;}
+  cont.innerHTML=lista.slice().reverse().map(c=>`<div class="row" style="flex-direction:column;align-items:flex-start;gap:4px;padding:10px 0">
+    <div style="display:flex;justify-content:space-between;width:100%;align-items:center"><span style="font-size:13px;font-weight:500">${c.descripcion}</span><span style="font-family:var(--font-mono)">${f(c.monto_pen)}</span></div>
+    <div style="display:flex;gap:5px;flex-wrap:wrap"><span style="font-size:11px;color:var(--text3)">${c.fecha} · ${c.emisor||c.tipo}</span><span class="badge ${c.deductible==='si'?'bg-green':c.deductible==='parcial'?'bg-amber':'bg-red'}" style="font-size:9px">${c.deductible==='si'?`DEDUC. ${c.pct_deducible}%`:c.deductible==='parcial'?`PARCIAL ${c.pct_deducible}%`:'NO DEDUC.'}</span>${c.riesgo&&c.riesgo!=='ninguno'?`<span class="badge" style="font-size:9px;background:rgba(244,185,66,.1);color:var(--amber);border:1px solid rgba(244,185,66,.2)">RIESGO ${c.riesgo.toUpperCase()}</span>`:''}</div>
+    ${c.base_deducible>0?`<div style="font-size:11px;color:var(--green)">Deducible: ${f(c.base_deducible)}</div>`:''}
+    <button class="btn btn-danger btn-sm" style="font-size:10px;padding:3px 10px" onclick="borrarComp(${c.id})">Eliminar</button>
+  </div>`).join('');
+}
+function borrarComp(id){DB.comprobantes=DB.comprobantes.filter(c=>c.id!==id);save();renderCompList('todos');}
+
+// ===== OPORTUNIDADES =====
+function calcSim(){
+  const alq=g('sim-alq'),rest=g('sim-rest'),med=g('sim-med'),hon=g('sim-hon'),tasa=g('sim-tasa')||8;
+  const dAlq=alq*12*.3,dRest=rest*12*.15,dMed=med*.3,dHon=hon*.3;
+  const totBruto=dAlq+dRest+dMed+dHon,totConTope=Math.min(totBruto,3*UIT);
+  const ahorro=totConTope*(tasa/100);
+  el('sim-results').innerHTML=`
+    <div class="metric"><div class="ml">Deducción alquiler</div><div class="mv purple">${f(dAlq)}</div></div>
+    <div class="metric"><div class="ml">Deducción restaurantes</div><div class="mv amber">${f(dRest)}</div></div>
+    <div class="metric"><div class="ml">Deduc. médicos + hon.</div><div class="mv blue">${f(dMed+dHon)}</div></div>
+    <div class="metric"><div class="ml">Ahorro fiscal est.</div><div class="mv green">${f(ahorro)}</div><div class="ms">Tope aplicado: ${f(totConTope)}</div></div>`;
+  // Preview en dashboard
+  const oppEl=el('dash-opp-preview');
+  if(oppEl&&totBruto>0)oppEl.innerHTML+=`<div class="alert a-purple" style="margin-top:.75rem">💡 Con tus gastos actuales podrías deducir hasta <strong>${f(totConTope)}</strong> y ahorrar <strong>${f(ahorro)}</strong> en IR.</div>`;
+}
+
+// ===== PRESUPUESTO =====
+const GASTOS_DEF=[
+  {cat:'alquiler',desc:'Alquiler vivienda/oficina',monto:0,tipo_comp:'form1683',deductible:'si'},
+  {cat:'alimentacion',desc:'Restaurantes / almuerzos trabajo',monto:0,tipo_comp:'boleta',deductible:'si'},
+  {cat:'transporte',desc:'Transporte (taxi, Uber)',monto:0,tipo_comp:'sin_comp',deductible:'no'},
+  {cat:'software',desc:'Software y herramientas (Claude, GitHub)',monto:0,tipo_comp:'factura',deductible:'no'},
+  {cat:'salud',desc:'Salud / médicos',monto:0,tipo_comp:'honorarios',deductible:'si'},
+  {cat:'capacitacion',desc:'Capacitación / cursos',monto:0,tipo_comp:'factura',deductible:'si'},
+  {cat:'honorarios_prof',desc:'Honorarios contador/abogado',monto:0,tipo_comp:'honorarios',deductible:'si'},
+  {cat:'otros',desc:'Gastos varios',monto:0,tipo_comp:'sin_comp',deductible:'no'},
+];
+function buildGastosForm(){if(!DB.gastos_lineas||DB.gastos_lineas.length===0)DB.gastos_lineas=GASTOS_DEF.map(g=>({...g}));renderGastosForm();}
+function renderGastosForm(){
+  el('gastos-form').innerHTML=DB.gastos_lineas.map((g,i)=>`
+    <div style="display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr auto;gap:8px;margin-bottom:8px;align-items:end">
+      <div class="fg" style="margin:0"><label>Descripción</label><input type="text" value="${g.desc}" oninput="DB.gastos_lineas[${i}].desc=this.value"/></div>
+      <div class="fg" style="margin:0"><label>Monto S/</label><input type="number" value="${g.monto||0}" min="0" step="1" oninput="DB.gastos_lineas[${i}].monto=parseFloat(this.value)||0;calcPres()"/></div>
+      <div class="fg" style="margin:0"><label>Categoría</label><select onchange="DB.gastos_lineas[${i}].cat=this.value">${Object.entries(CATS).map(([v,l])=>`<option value="${v}" ${g.cat===v?'selected':''}>${l}</option>`).join('')}</select></div>
+      <div class="fg" style="margin:0"><label>Comprobante</label><select onchange="DB.gastos_lineas[${i}].tipo_comp=this.value;DB.gastos_lineas[${i}].deductible=this.value==='sin_comp'?'no':'si'">
+        <option value="factura" ${g.tipo_comp==='factura'?'selected':''}>Factura</option>
+        <option value="boleta" ${g.tipo_comp==='boleta'?'selected':''}>Boleta c/DNI</option>
+        <option value="honorarios" ${g.tipo_comp==='honorarios'?'selected':''}>Rec. honorarios</option>
+        <option value="form1683" ${g.tipo_comp==='form1683'?'selected':''}>Form. 1683</option>
+        <option value="sin_comp" ${g.tipo_comp==='sin_comp'?'selected':''}>Sin comprobante</option>
+      </select></div>
+      <button class="btn btn-danger btn-sm" style="height:36px;margin:0" onclick="DB.gastos_lineas.splice(${i},1);renderGastosForm()">✕</button>
+    </div>`).join('');
+  calcPres();
+}
+function addGasto(){DB.gastos_lineas.push({cat:'otros',desc:'Nuevo gasto',monto:0,tipo_comp:'sin_comp',deductible:'no'});renderGastosForm();}
+function calcPres(){
+  const tc=g('p-tc'),usd=g('p-usd'),pen=g('p-pen'),ot=g('p-otros');
+  const ing=(usd*tc)+pen+ot,totG=(DB.gastos_lineas||[]).reduce((s,g)=>s+(g.monto||0),0);
+  const gasD=(DB.gastos_lineas||[]).filter(g=>g.deductible==='si').reduce((s,g)=>s+(g.monto||0),0);
+  el('pres-metrics').innerHTML=`
+    <div class="metric"><div class="ml">Ingreso bruto</div><div class="mv accent">${f(ing)}</div></div>
+    <div class="metric"><div class="ml">Total gastos</div><div class="mv red">${f(totG)}</div></div>
+    <div class="metric"><div class="ml">Gastos c/comprobante</div><div class="mv green">${f(gasD)}</div></div>
+    <div class="metric"><div class="ml">Saldo neto</div><div class="mv ${ing-totG>=0?'blue':'red'}">${f(ing-totG)}</div></div>`;
+  el('pres-resumen').innerHTML=`<p class="ct">Resumen tributario</p>
+    <div class="row"><span class="rl">Ingreso bruto</span><span class="rv">${f(ing)}</span></div>
+    <div class="row"><span class="rl">Total gastos</span><span class="rv neg">− ${f(totG)}</span></div>
+    <div class="row"><span class="rl">Retención 8%</span><span class="rv neg">− ${f(ing*.08)}</span></div>
+    <div class="total-row"><span>Neto estimado</span><span style="font-family:var(--font-mono);color:${ing-totG-ing*.08>=0?'var(--green)':'var(--red)'}">${f(ing-totG-ing*.08)}</span></div>`;
+}
+function cargarMes(){
+  const mes=el('pres-mes').value,year=el('pres-year').value,key=`${year}-${mes}`,data=DB.meses[key];
+  if(data){el('p-usd').value=data.ing_usd||0;el('p-pen').value=data.ing_pen||0;el('p-tc').value=data.tc||3.48;el('p-otros').value=data.ing_otros||0;DB.gastos_lineas=data.gastos?[...data.gastos]:GASTOS_DEF.map(g=>({...g}));}
+  else{el('p-usd').value=0;el('p-pen').value=0;el('p-tc').value=3.48;el('p-otros').value=0;DB.gastos_lineas=GASTOS_DEF.map(g=>({...g}));}
+  renderGastosForm();
+}
+function guardarMes(){
+  const mes=el('pres-mes').value,year=el('pres-year').value,key=`${year}-${mes}`;
+  const ing=(g('p-usd')*g('p-tc'))+g('p-pen')+g('p-otros');
+  DB.meses[key]={ing_usd:g('p-usd'),ing_pen:g('p-pen'),tc:g('p-tc'),ing_otros:g('p-otros'),gastos:DB.gastos_lineas.map(g=>({...g})),retenciones:ing*.08};
+  save();alert(`✓ ${MN[parseInt(mes)]} ${year} guardado.`);
+}
+
+// ===== HISTORIAL =====
+let histYear='2026';
+function filtrarHist(y,btn){document.querySelectorAll('.it').forEach(b=>b.classList.remove('on'));btn.classList.add('on');histYear=y;renderHist();}
+function renderHist(){
+  const entries=Object.entries(DB.meses).filter(([k])=>histYear==='todos'||k.startsWith(histYear)).sort((a,b)=>a[0].localeCompare(b[0]));
+  if(!entries.length){el('hist-tabla').innerHTML='<div class="empty"><p>Sin datos. Guarda meses en Presupuesto.</p></div>';el('hist-ded').innerHTML='';el('hist-comps').innerHTML='';return;}
+  let tb=0,tg=0,tr=0,tir=0;
+  const rows=entries.map(([k,m])=>{
+    const ing=getIngMes(m),gas=(m.gastos||[]).reduce((s,g)=>s+(g.monto||0),0),ret=m.retenciones||0;
+    const d20=Math.min(ing*.2,24*UIT),base=Math.max(0,ing-d20-7*UIT),ir=calcIR(base);
+    tb+=ing;tg+=gas;tr+=ret;tir+=ir;
+    const[yr,ms]=k.split('-');
+    return`<tr><td><strong>${MN[parseInt(ms)]}</strong> <span style="color:var(--text3);font-size:10px">${yr}</span></td><td style="font-family:var(--font-mono)">${f(ing)}</td><td style="font-family:var(--font-mono);color:var(--text3)">${m.ing_usd?fu(m.ing_usd):''}</td><td style="font-family:var(--font-mono);color:var(--red)">${f(gas)}</td><td style="font-family:var(--font-mono);color:${ing-gas>=0?'var(--green)':'var(--red)'}">${f(ing-gas)}</td><td style="font-family:var(--font-mono);color:var(--amber)">${f(ret)}</td><td style="font-family:var(--font-mono);color:var(--red)">${f(ir)}</td></tr>`;
+  }).join('');
+  el('hist-tabla').innerHTML=`<table class="tbl"><thead><tr><th style="text-align:left">Período</th><th>Ing. bruto</th><th>USD</th><th>Gastos</th><th>Saldo</th><th>Ret. 8%</th><th>IR est.</th></tr></thead><tbody>${rows}</tbody><tfoot><tr class="tfoot"><td>TOTAL</td><td>${f(tb)}</td><td>—</td><td>${f(tg)}</td><td>${f(tb-tg)}</td><td>${f(tr)}</td><td>${f(tir)}</td></tr></tfoot></table>`;
+  const ded={};entries.forEach(([,m])=>{(m.gastos||[]).filter(g=>g.deductible==='si').forEach(g=>{ded[g.cat]=(ded[g.cat]||0)+(g.monto||0);});});
+  el('hist-ded').innerHTML=Object.entries(ded).length?Object.entries(ded).sort((a,b)=>b[1]-a[1]).map(([c,mo])=>`<div class="row"><span><span class="badge bg-${CCOLORS[c]||'blue'}" style="font-size:9px">${CATS[c]||c}</span></span><span style="font-family:var(--font-mono);font-size:13px;color:var(--green)">${f(mo)}</span></div>`).join(''):'<div class="empty"><p>Sin gastos deducibles</p></div>';
+  const siC=DB.comprobantes.filter(c=>c.deductible==='si'),pC=DB.comprobantes.filter(c=>c.deductible==='parcial'),noC=DB.comprobantes.filter(c=>c.deductible==='no');
+  el('hist-comps').innerHTML=DB.comprobantes.length?`<div class="row"><span class="rl">Total</span><span class="rv">${DB.comprobantes.length}</span></div><div class="row"><span><span class="badge bg-green">DEDUCIBLES</span></span><span class="rv green">${siC.length} — ${f(siC.reduce((s,c)=>s+(c.base_deducible||0),0))}</span></div><div class="row"><span><span class="badge bg-amber">PARCIALES</span></span><span class="rv amber">${pC.length}</span></div><div class="row"><span><span class="badge bg-red">NO DEDUCIBLES</span></span><span class="rv red">${noC.length}</span></div>`:'<div class="empty"><p>Sube comprobantes para ver el resumen</p></div>';
+}
+
+// ===== CALCULADORA IR =====
+function calcIRPanel(){
+  const uit=g('ir-uit')||5500;
+  const m26=Object.entries(DB.meses).filter(([k])=>k.startsWith('2026'));
+  const ingH=m26.reduce((s,[,m])=>s+getIngMes(m),0),retH=m26.reduce((s,[,m])=>s+(m.retenciones||0),0);
+  el('ir-ing-hist').textContent=f(ingH);el('ir-ret-hist').textContent=f(retH);
+  const totalIng=ingH+g('ir-ajuste');el('ir-total-ing').textContent=f(totalIng);
+  // Deducciones 3 UIT con tasas 2026 correctas
+  const al=g('ir-alq'),ho=g('ir-hon'),re=g('ir-rest'),med=g('ir-med'),ess=g('ir-ess');
+  const d3raw=al*.3+ho*.3+re*.15+med*.3+ess; // RESTAURANTES: 15% EN 2026
+  const d3=Math.min(d3raw,3*uit),d3pct=Math.min(100,(d3/(3*uit)*100)).toFixed(0);
+  el('ir-d3').textContent=f(d3);el('ir-d3bar').style.width=d3pct+'%';el('ir-d3pct').textContent=`${d3pct}% utilizado · Disponible: ${f(3*uit-d3)}`;
+  const totalRet=retH+g('ir-ret-add');
+  const d20=Math.min(totalIng*.2,24*uit),rn=totalIng-d20,d7=7*uit,base=Math.max(0,rn-d7-d3),ir=calcIR(base),dev=Math.max(0,totalRet-ir),pag=Math.max(0,ir-totalRet);
+  el('ir-waterfall').innerHTML=`
+    <div class="wf-row wf-main"><span>Ingresos brutos</span><span style="font-family:var(--font-mono)">${f(totalIng)}</span></div>
+    <div class="wf-row wf-ded"><span>− Deducción 20% presunto</span><span style="font-family:var(--font-mono);color:var(--red)">− ${f(d20)}</span></div>
+    <div class="wf-row wf-main"><span>= Renta neta 4ta cat.</span><span style="font-family:var(--font-mono)">${f(rn)}</span></div>
+    <div class="wf-row wf-ded"><span>− 7 UIT (S/ ${(7*uit).toLocaleString('es-PE')})</span><span style="font-family:var(--font-mono);color:var(--red)">− ${f(d7)}</span></div>
+    <div class="wf-row wf-ded"><span>− Deduc. adicionales (3 UIT máx.)</span><span style="font-family:var(--font-mono);color:var(--red)">− ${f(d3)}</span></div>
+    <div class="wf-row wf-result"><span style="font-weight:600">Base imponible</span><span style="font-family:var(--font-mono);color:var(--accent)">${f(base)}</span></div>
+    <div class="wf-row wf-sub"><span>IR calculado</span><span style="font-family:var(--font-mono);color:var(--red)">${f(ir)}</span></div>
+    <div class="wf-row wf-sub"><span>− Retenciones totales</span><span style="font-family:var(--font-mono);color:var(--green)">− ${f(totalRet)}</span></div>
+    <div class="wf-row wf-result"><span style="font-weight:600">${dev>0?'Devolución a solicitar':'Saldo a pagar DJ'}</span><span style="font-family:var(--font-mono);color:${dev>0?'var(--green)':'var(--amber)'};font-size:15px">${dev>0?f(dev):f(pag)}</span></div>`;
+  el('ir-m1').textContent=f(ir);el('ir-m2-label').textContent=dev>0?'Devolución estimada':'Saldo a pagar (DJ)';el('ir-m2').textContent=dev>0?f(dev):f(pag);el('ir-m2').className='mv '+(dev>0?'green':'amber');
+  const T=[[5*uit,.08,'8%'],[20*uit,.14,'14%'],[35*uit,.17,'17%'],[45*uit,.20,'20%'],[Infinity,.30,'30%']];let ac=0;
+  el('ir-tramos').innerHTML=`<thead><tr><th style="text-align:left">Tramo</th><th>Tasa</th><th>Gravable</th><th>Impuesto</th></tr></thead><tbody>`+T.map(([lim,tasa,label])=>{if(base<=ac)return'';const grav=Math.min(base-ac,lim===Infinity?base-ac:lim-ac),imp=grav*tasa;ac=lim===Infinity?base:lim;return`<tr><td>${label}</td><td style="font-family:var(--font-mono);color:var(--amber)">${label}</td><td style="font-family:var(--font-mono)">${f(grav)}</td><td style="font-family:var(--font-mono);color:var(--red)">${f(imp)}</td></tr>`;}).join('')+'</tbody>';
+}
+
+// ===== INIT =====
+if(!DB.meses['2026-3']){DB.meses['2026-3']={ing_usd:1134.45,ing_pen:1152.00,tc:3.48,ing_otros:0,gastos:GASTOS_DEF.map(g=>({...g})),retenciones:((1134.45*3.48)+1152.00)*.08};save();}
+renderDash();renderCompList('todos');calcIRPanel();buildGastosForm();cargarMes();calcSim();
+</script>
+</body>
+</html>
