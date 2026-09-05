@@ -97,6 +97,12 @@ select option{background:var(--bg3)}
 .req-item{display:flex;align-items:flex-start;gap:8px;font-size:12px;color:var(--text2);margin-bottom:4px;padding:4px 0;border-bottom:1px solid var(--border)}
 .req-item:last-child{border-bottom:none}
 .req-icon{font-size:14px;flex-shrink:0;margin-top:1px}
+.res-link{display:flex;align-items:center;gap:14px;padding:12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);text-decoration:none;color:var(--text);transition:border-color .2s,background .2s}
+.res-link:hover{border-color:var(--border2);background:var(--bg4)}
+.res-thumb{width:120px;height:68px;border-radius:6px;object-fit:cover;flex-shrink:0;background:var(--bg4);border:1px solid var(--border)}
+.res-body{display:flex;flex-direction:column;gap:3px;min-width:0}
+.res-title{font-size:13px;font-weight:600;color:var(--text)}
+.res-meta{font-size:11px;color:var(--text3);font-family:var(--font-mono);word-break:break-all}
 .opp-card{background:var(--bg3);border:1px solid rgba(167,139,250,.2);border-radius:var(--r-lg);padding:1rem;margin-bottom:.75rem;position:relative;overflow:hidden}
 .opp-card::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:var(--purple)}
 .opp-title{font-size:13px;font-weight:600;color:var(--purple);margin-bottom:.35rem}
@@ -333,6 +339,18 @@ select option{background:var(--bg3)}
         <div class="req-item"><span class="req-icon">✓</span><span>Mejora tu flujo de caja mensual</span></div>
       </div>
     </div>
+  </div>
+
+  <!-- Recursos -->
+  <div class="card">
+    <p class="ct">🎬 Recursos</p>
+    <a class="res-link" href="https://youtu.be/WwbKPAHlHSI" target="_blank" rel="noopener noreferrer">
+      <img class="res-thumb" src="https://img.youtube.com/vi/WwbKPAHlHSI/hqdefault.jpg" alt="Miniatura del video" loading="lazy"/>
+      <span class="res-body">
+        <span class="res-title">Video de referencia — Gastos deducibles y requisitos</span>
+        <span class="res-meta">YouTube · youtu.be/WwbKPAHlHSI · se abre en una pestaña nueva</span>
+      </span>
+    </a>
   </div>
 </div>
 
