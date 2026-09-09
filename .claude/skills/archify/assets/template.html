@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<!--
+  archify runtime-architecture template.
+  Fill in the marked regions and save as a standalone .html file.
+  Rules that keep it a real single-file diagram:
+    - Keep ALL styling inline (this <style> block). No external CSS, JS, or fonts.
+    - Draw the diagram as inline SVG (below). It scales and needs nothing external.
+    - Use the CSS variables for every color so light & dark themes both stay readable.
+    - Replace every {{PLACEHOLDER}} and the example nodes/edges with the real system.
+  Placeholders to replace:
+    {{TITLE}}           - e.g. "Acme API — Runtime Architecture"
+    {{FLOW_CAPTION}}    - one line naming the main flow, e.g.
+                          "Main flow: a checkout request, steps 1–5"
+    Component boxes     - inside <g id="components">
+    Flow edges          - inside <g id="edges">, numbered along the main flow
+    Trust-boundary text - the <text> labels on the two boundary regions
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{TITLE}}</title>
+<style>
+  :root {
+    --bg: #f7f7f5; --panel: #ffffff; --ink: #1a1a18; --muted: #6b6b66;
+    --border: #d9d9d4;
+    --internal-fill: rgba(96,168,240,0.08); --internal-stroke: #4a86c9;
+    --external-fill: rgba(244,185,66,0.08); --external-stroke: #c99a2e;
+    --node-fill: #ffffff; --node-stroke: #b7b7b1; --node-ink: #1a1a18;
+    --flow: #d6455f;        /* the ONE main flow — make it dominant */
+    --flow-ink: #d6455f;
+    --edge: #9a9a94;        /* secondary edges — quiet */
+    --badge-bg: #d6455f; --badge-ink: #ffffff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f0f0d; --panel: #171715; --ink: #f0efe8; --muted: #9a9990;
+      --border: #2a2a26;
+      --internal-fill: rgba(96,168,240,0.10); --internal-stroke: #5f93d6;
+      --external-fill: rgba(244,185,66,0.10); --external-stroke: #d6b24a;
+      --node-fill: #1e1e1b; --node-stroke: #3a3a34; --node-ink: #f0efe8;
+      --flow: #ff6b83; --flow-ink: #ff6b83;
+      --edge: #55554e;
+      --badge-bg: #ff6b83; --badge-ink: #171715;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 24px 20px 48px; }
+  header h1 { font-size: 22px; margin: 0 0 4px; }
+  header p { margin: 0; color: var(--muted); font-size: 14px; }
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 16px; margin: 16px 0 8px;
+    padding: 12px 14px; background: var(--panel); border: 1px solid var(--border);
+    border-radius: 10px; font-size: 12.5px; color: var(--muted);
+  }
+  .legend .item { display: flex; align-items: center; gap: 7px; }
+  .swatch { width: 14px; height: 14px; border-radius: 3px; border: 1px solid var(--border); }
+  .swatch.internal { background: var(--internal-fill); border-color: var(--internal-stroke); }
+  .swatch.external { background: var(--external-fill); border-color: var(--external-stroke); }
+  .line { width: 22px; height: 0; border-top: 3px solid var(--flow); }
+  .line.secondary { border-top: 2px dashed var(--edge); }
+  .canvas {
+    margin-top: 12px; background: var(--panel); border: 1px solid var(--border);
+    border-radius: 12px; overflow: auto;
+  }
+  svg { display: block; width: 100%; height: auto; }
+  /* SVG element styles */
+  .region { rx: 14; }
+  .region.internal { fill: var(--internal-fill); stroke: var(--internal-stroke); stroke-width: 1.5; stroke-dasharray: 6 4; }
+  .region.external { fill: var(--external-fill); stroke: var(--external-stroke); stroke-width: 1.5; stroke-dasharray: 6 4; }
+  .region-label { fill: var(--muted); font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; }
+  .node rect { fill: var(--node-fill); stroke: var(--node-stroke); stroke-width: 1.5; rx: 9; }
+  .node .name { fill: var(--node-ink); font-size: 13px; font-weight: 600; }
+  .node .kind { fill: var(--muted); font-size: 10.5px; letter-spacing: 0.04em; text-transform: uppercase; }
+  .edge { stroke: var(--edge); stroke-width: 1.6; fill: none; stroke-dasharray: 5 4; }
+  .edge.flow { stroke: var(--flow); stroke-width: 2.6; stroke-dasharray: none; }
+  .edge-label { fill: var(--muted); font-size: 11px; }
+  .step { fill: var(--badge-bg); }
+  .step-text { fill: var(--badge-ink); font-size: 11px; font-weight: 700; }
+  .caption { margin-top: 10px; color: var(--muted); font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>{{TITLE}}</h1>
+    <p>Runtime architecture — 8–12 principal components, one main flow, trust boundaries shown.</p>
+  </header>
+
+  <div class="legend">
+    <div class="item"><span class="swatch internal"></span> Internal (owned &amp; controlled)</div>
+    <div class="item"><span class="swatch external"></span> External (third-party / not controlled)</div>
+    <div class="item"><span class="line"></span> Main flow</div>
+    <div class="item"><span class="line secondary"></span> Secondary path</div>
+  </div>
+
+  <div class="canvas">
+    <!-- Size the viewBox to fit your layout; the SVG scales to width. -->
+    <svg viewBox="0 0 1000 560" role="img" aria-label="{{TITLE}}">
+      <defs>
+        <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="var(--edge)"/>
+        </marker>
+        <marker id="arrow-flow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="var(--flow)"/>
+        </marker>
+      </defs>
+
+      <!-- ===================== TRUST BOUNDARIES ===================== -->
+      <!-- Two regions: Internal (what you own) and External (what you call).
+           Resize/reposition to hold your nodes. Add a third region only if the
+           story truly needs it (e.g. a separate "User device" zone). -->
+      <g id="boundaries">
+        <rect class="region internal" x="30" y="70" width="560" height="450"></rect>
+        <text class="region-label" x="46" y="94">Internal — {{INTERNAL_LABEL}}</text>
+
+        <rect class="region external" x="640" y="70" width="330" height="450"></rect>
+        <text class="region-label" x="656" y="94">External — {{EXTERNAL_LABEL}}</text>
+      </g>
+
+      <!-- ===================== FLOW EDGES =====================
+           Draw edges BEFORE nodes so nodes sit on top. The main flow uses
+           class="edge flow" + marker-end="url(#arrow-flow)" and carries numbered
+           step badges. Secondary edges use class="edge". Replace the examples. -->
+      <g id="edges">
+        <!-- EXAMPLE main-flow edge (replace):
+        <path class="edge flow" d="M170,180 L170,250" marker-end="url(#arrow-flow)"/>
+        <g transform="translate(158,207)">
+          <circle class="step" r="10"/>
+          <text class="step-text" x="0" y="4" text-anchor="middle">2</text>
+        </g>
+        -->
+      </g>
+
+      <!-- ===================== COMPONENTS =====================
+           One <g class="node"> per component. Keep to 8–12 total.
+           Use the two-line label: .name (what it is) + .kind (its runtime role,
+           e.g. SERVICE, DATABASE, QUEUE, BROWSER, THIRD-PARTY API, CDN). -->
+      <g id="components">
+        <!-- EXAMPLE node (replace, and duplicate for each component):
+        <g class="node" transform="translate(90,120)">
+          <rect width="160" height="58"></rect>
+          <text class="name" x="16" y="26">API Server</text>
+          <text class="kind" x="16" y="44">SERVICE</text>
+        </g>
+        -->
+      </g>
+    </svg>
+  </div>
+
+  <p class="caption">{{FLOW_CAPTION}}</p>
+</div>
+</body>
+</html>
